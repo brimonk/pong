@@ -2,9 +2,9 @@
 
 I got bored, and I decided to write pong.
 
-### Build Instructions
+### Build and Play Instructions
 
-    make
+    make (clean)
     pong
 
 ### How To Play
