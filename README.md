@@ -2,12 +2,10 @@
 
 I got bored, and I decided to write pong.
 
-### 'Installation'
+### Build Instructions
 
-I do **NOT** feel that it's necessary to include an installation option within
-the `Makefile`; therefore, you can simply type `make` and if you have ncurses
-installed with a C compiler, the program will compile everything, and spit out
-a binary: `pong`.
+    make
+    pong
 
 ### How To Play
 
