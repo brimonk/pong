@@ -32,13 +32,13 @@ typedef struct dimensions {
 	int y;
 } dimensions_t;
 
-void draw_ball(struct ball *input);
-void draw_paddle(struct paddle *paddle);
-void draw_score(struct paddle *inpt_paddle, struct dimensions *wall);
-void paddle_collisions(struct ball *inpt_ball, struct paddle *inpt_paddle);
-void paddle_pos(struct paddle *pddl, struct dimensions *wall, char dir);
+void draw_ball(ball_t *input);
+void draw_paddle(paddle_t *paddle);
+void draw_score(paddle_t *inpt_paddle, dimensions_t *wall);
+void paddle_collisions(ball_t *inpt_ball, paddle_t *inpt_paddle);
+void paddle_pos(paddle_t *pddl, dimensions_t *wall, char dir);
 
-int wall_collisions(struct ball *usr_ball, struct dimensions *walls);
+int wall_collisions(ball_t *usr_ball, dimensions_t *walls);
 int kbdhit();
 
 int main(int argc, char **argv)
@@ -48,11 +48,11 @@ int main(int argc, char **argv)
 	noecho();
 	curs_set(0);
 
-	struct dimensions walls = { 0 };
+	dimensions_t walls = { 0 };
 	getmaxyx(stdscr, walls.y, walls.x); /* get dimensions */
 
 	/* set the paddle variables */
-	struct paddle usr_paddle = { 0 };
+	paddle_t usr_paddle = { 0 };
 
 	usr_paddle.x = 5;
 	usr_paddle.y = 11;
@@ -131,11 +131,11 @@ int main(int argc, char **argv)
 /*
  * function : paddle_pos
  * purpose  : have a function that will return a proper 'y' value for the paddle
- * input    : struct paddle *inpt_paddle, struct dimensions *wall, char dir
+ * input    : paddle_t *inpt_paddle, dimensions_t *wall, char dir
  * output   : void
  */
 
-void paddle_pos(struct paddle *pddl, struct dimensions *wall, char dir)
+void paddle_pos(paddle_t *pddl, dimensions_t *wall, char dir)
 {
 	if (dir == 'j') { /* moving down */
 		if (pddl->y + pddl->len + 1 <= wall->y)
@@ -152,10 +152,10 @@ void paddle_pos(struct paddle *pddl, struct dimensions *wall, char dir)
 /*
  * function : wall_collisions
  * purpose  : to check for collisions on the terminal walls
- * input    : struct ball *, struct dimensions *
+ * input    : ball_t *, dimensions_t *
  * output   : nothing (stored within the structs)
  */
-int wall_collisions(struct ball *usr_ball, struct dimensions *walls)
+int wall_collisions(ball_t *usr_ball, dimensions_t *walls)
 {
 	/* check if we're supposed to leave quick */
 	if (usr_ball->next_x < 0) {
@@ -181,7 +181,7 @@ int wall_collisions(struct ball *usr_ball, struct dimensions *walls)
 
 /* -------------------------------------------------------------------------- */
 
-void paddle_collisions(struct ball *inpt_ball, struct paddle *inpt_paddle)
+void paddle_collisions(ball_t *inpt_ball, paddle_t *inpt_paddle)
 {
 	/* 
 	* simply check if next_% (because we set the next_x && next_y first) 
@@ -206,16 +206,16 @@ void paddle_collisions(struct ball *inpt_ball, struct paddle *inpt_paddle)
 /*
  * functions : draw_ball && draw_paddle
  * purpose   : condense the drawing functions to functions
- * input     : struct ball * && struct paddle *
+ * input     : ball_t * && paddle_t *
  * output    : void
  */
-void draw_ball(struct ball *input)
+void draw_ball(ball_t *input)
 {
 	mvprintw(input->y, input->x, "O");
 	return;
 }
 
-void draw_paddle(struct paddle *paddle)
+void draw_paddle(paddle_t *paddle)
 {
 	int i;
 
@@ -225,7 +225,7 @@ void draw_paddle(struct paddle *paddle)
 	return;
 }
 
-void draw_score(struct paddle *inpt_paddle, struct dimensions *wall)
+void draw_score(paddle_t *inpt_paddle, dimensions_t *wall)
 {
 	mvprintw(0, wall->x / 2 - 7, "Score: %d", inpt_paddle->score);
 
