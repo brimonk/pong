@@ -9,27 +9,27 @@
 
 #define DELAY 30000
 
-struct paddle {
-    /* paddle variables */
-    int x;
-    int y;    /* y is the 'top' of the paddle */
-    int len;
-    int score;
+typedef struct paddle {
+	/* paddle variables */
+	int x;
+	int y;    /* y is the 'top' of the paddle */
+	int len;
+	int score;
 } paddle_t;
 
-struct ball {
-    /* ball variables */
-	int ball_x;
-    int ball_y;
+typedef struct ball {
+	/* ball variables */
+	int x;
+	int y;
 	int next_x;
-    int next_y;
-    int ball_x_vel;
-    int ball_y_vel;
+	int next_y;
+	int x_vel;
+	int y_vel;
 } ball_t;
 
-struct dimensions {
-    int max_x;
-    int max_y;
+typedef struct dimensions {
+	int x;
+	int y;
 } dimensions_t;
 
 void draw_ball(struct ball *input);
@@ -49,26 +49,24 @@ int main(int argc, char **argv)
 	curs_set(0);
 
 	struct dimensions walls = { 0 };
-	getmaxyx(stdscr, walls.max_y, walls.max_x); /* get dimensions */
-
-	struct paddle usr_paddle = { 0 };
+	getmaxyx(stdscr, walls.y, walls.x); /* get dimensions */
 
 	/* set the paddle variables */
+	struct paddle usr_paddle = { 0 };
+
 	usr_paddle.x = 5;
 	usr_paddle.y = 11;
-	usr_paddle.len = walls.max_y / 4;
-	usr_paddle.score = 0;
+	usr_paddle.len = walls.y / 4; usr_paddle.score = 0; 
 
-	/* now that we can get term dimensions, we can make a ball */
-	struct ball usr_ball = { 0 };
+	/* set the ball */
+	ball_t usr_ball = { 0 };
 
-	/* set the initial values for the ball */
-	usr_ball.ball_x = walls.max_x / 2;
-	usr_ball.ball_y = walls.max_y / 2;
+	usr_ball.x = walls.x / 2;
+	usr_ball.y = walls.y / 2;
 	usr_ball.next_x = 0;
 	usr_ball.next_y = 0;
-	usr_ball.ball_x_vel = 1;
-	usr_ball.ball_y_vel = 1;
+	usr_ball.x_vel = 1;
+	usr_ball.y_vel = 1;
 
 	/* we actually have to store the user's keypress somewhere... */
 	int keypress = 0;
@@ -78,7 +76,7 @@ int main(int argc, char **argv)
 
 	while (run) {
 		while (kbdhit()) {
-			getmaxyx(stdscr, walls.max_y, walls.max_x);
+			getmaxyx(stdscr, walls.y, walls.x);
 			clear(); /* clear screen of all printed chars */
 
 			draw_ball(&usr_ball);
@@ -88,8 +86,8 @@ int main(int argc, char **argv)
 			usleep(DELAY);
 
 			/* set next positions */
-			usr_ball.next_x = usr_ball.ball_x + usr_ball.ball_x_vel;
-			usr_ball.next_y = usr_ball.ball_y + usr_ball.ball_y_vel;
+			usr_ball.next_x = usr_ball.x + usr_ball.x_vel;
+			usr_ball.next_y = usr_ball.y + usr_ball.y_vel;
 
 			/* check for collisions */
 			paddle_collisions(&usr_ball, &usr_paddle);
@@ -111,13 +109,15 @@ int main(int argc, char **argv)
 
 		case 'p': /* pause functionality, because why not */
 			mvprintw(1, 0, "PAUSE - press any key to resume");
-			while (!kbdhit()) {
-				usleep(DELAY);
+			while (getch() == ERR) {
+				usleep(DELAY * 7);
 			}
 			break;
+
 		case 'q':
 			run = 0;
 			break;
+
 		}
 	}
 
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 void paddle_pos(struct paddle *pddl, struct dimensions *wall, char dir)
 {
 	if (dir == 'j') { /* moving down */
-		if (pddl->y + pddl->len + 1 <= wall->max_y)
+		if (pddl->y + pddl->len + 1 <= wall->y)
 			pddl->y++;
 	} else {          /* moving up (must be 'k') */
 		if (pddl->y - 1 >= 0)
@@ -163,17 +163,17 @@ int wall_collisions(struct ball *usr_ball, struct dimensions *walls)
 	}
 
 	/* check for X */
-	if (usr_ball->next_x >= walls->max_x) {
-		usr_ball->ball_x_vel *= -1;
+	if (usr_ball->next_x >= walls->x) {
+		usr_ball->x_vel *= -1;
 	} else {
-		usr_ball->ball_x += usr_ball->ball_x_vel;
+		usr_ball->x += usr_ball->x_vel;
 	}
 
 	/* check for Y */
-	if (usr_ball->next_y >= walls->max_y || usr_ball->next_y < 0) {
-		usr_ball->ball_y_vel *= -1;
+	if (usr_ball->next_y >= walls->y || usr_ball->next_y < 0) {
+		usr_ball->y_vel *= -1;
 	} else {
-		usr_ball->ball_y += usr_ball->ball_y_vel;
+		usr_ball->y += usr_ball->y_vel;
 	}
 
 	return 0;
@@ -189,12 +189,12 @@ void paddle_collisions(struct ball *inpt_ball, struct paddle *inpt_paddle)
 	*/
 
 	if (inpt_ball->next_x == inpt_paddle->x) {
-		if (inpt_paddle->y <= inpt_ball->ball_y &&
-			inpt_ball->ball_y <= 
+		if (inpt_paddle->y <= inpt_ball->y &&
+			inpt_ball->y <= 
 			inpt_paddle->y + inpt_paddle->len) {
 
 			inpt_paddle->score++;
-			inpt_ball->ball_x_vel *= -1;
+			inpt_ball->x_vel *= -1;
 		}
 	}
 
@@ -211,7 +211,7 @@ void paddle_collisions(struct ball *inpt_ball, struct paddle *inpt_paddle)
  */
 void draw_ball(struct ball *input)
 {
-	mvprintw(input->ball_y, input->ball_x, "O");
+	mvprintw(input->y, input->x, "O");
 	return;
 }
 
@@ -227,7 +227,9 @@ void draw_paddle(struct paddle *paddle)
 
 void draw_score(struct paddle *inpt_paddle, struct dimensions *wall)
 {
-	mvprintw(0, wall->max_x / 2 - 7, "Score: %d", inpt_paddle->score);
+	mvprintw(0, wall->x / 2 - 7, "Score: %d", inpt_paddle->score);
+
+	return;
 }
 
 /* -------------------------------------------------------------------------- */
